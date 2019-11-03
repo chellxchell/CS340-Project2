@@ -10,6 +10,7 @@ class wildcat_sender(threading.Thread):
         self.my_logger = my_logger
         self.die = False
         self.buffer = []
+        self.receive_window = 0
         self.curr_packet = 0
         # add as needed
     
@@ -23,7 +24,7 @@ class wildcat_sender(threading.Thread):
         sum1, sum2 = self.getChecksum(send_arr)
         checksum1 = bytearray(sum1.to_bytes(16,byteorder='big'))
         checksum2 = bytearray(sum2.to_bytes(16,byteorder='big'))
-        send_arr.append(checksum1.append(checksum2))
+        send_arr.extend(checksum1.extend(checksum2))
 
         self.my_tunnel.magic_send(send_arr)
         pass
@@ -39,6 +40,11 @@ class wildcat_sender(threading.Thread):
         else:
             seq_num = int.from_bytes(packet_byte_array[0:2],byteorder='big')
             payload = packet_byte_array[2:-2]
+            bit_string = ""
+            for byte in payload:
+                bin_string += bin(int.from_bytes(byte,byteorder='big'))
+            bit_string[len(bit_string) - self.window_size:]
+
         pass
     
     # running in the background
