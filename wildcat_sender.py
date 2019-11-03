@@ -11,14 +11,18 @@ class wildcat_sender(threading.Thread):
         self.die = False
         # add as needed
     
+    # called with a bytearray when user wants to send a packet
     def new_packet(self, packet_byte_array):
-        # TODO: your implementation comes here
+        self.my_tunnel.magic_send(packet_byte_array)
+        #any unacknowledged packets will be resent within 0.5s
         pass
 
+    # called with a bytearray when packet arrives
     def receive(self, packet_byte_array):
         # TODO: your implementation comes here
         pass
     
+    # running in the background
     def run(self):
         while not self.die:
             # TODO: your implementation comes here
