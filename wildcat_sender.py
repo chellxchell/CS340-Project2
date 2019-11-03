@@ -20,35 +20,19 @@ class wildcat_sender(threading.Thread):
         send_arr.extend(packet_byte_array)
 
         # calculate Fletcher-16 checksum
-        sum1 = 0
-        sum2 = 0
-        for byte in send_arr:
-            sum1 += int.from_bytes(byte,byteorder='big')
-            sum2 += sum1
-        sum1 %= 255
-        sum2 %= 255
-
-        # append checksum
+        sum1, sum2 = self.getChecksum(send_arr)
         checksum1 = bytearray(sum1.to_bytes(16,byteorder='big'))
         checksum2 = bytearray(sum2.to_bytes(16,byteorder='big'))
-        send_arr.append(checksum1).append(checksum2)
+        send_arr.append(checksum1.append(checksum2))
 
         self.my_tunnel.magic_send(send_arr)
-        #any unacknowledged packets will be resent within 0.5s
         pass
 
     # called with a bytearray when packet arrives
     def receive(self, packet_byte_array):
         # check checksum
         checksum = packet_byte_array[-2:]
-        sum1 = 0
-        sum2 = 0
-        for byte in packet_byte_array[0:-2]:
-            sum1 += int.from_bytes(byte,byteorder='big')
-            sum2 += sum1
-        sum1 %= 255
-        sum2 %= 255
-
+        sum1, sum2 = self.getChecksum(packet_byte_array[0:-2])
         if int.from_bytes(checksum[0],byteorder='big') != sum1 or int.from_bytes(checksum[1],byteorder='big') != sum2:
             # drop packet
             pass
@@ -66,3 +50,13 @@ class wildcat_sender(threading.Thread):
     def join(self):
         self.die = True
         super().join()
+
+    def getChecksum(self, arr):
+        sum1 = 0
+        sum2 = 0
+        for byte in arr:
+            sum1 += int.from_bytes(byte,byteorder='big')
+            sum2 += sum1
+        sum1 %= 255
+        sum2 %= 255
+        return sum1, sum2
