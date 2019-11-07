@@ -33,7 +33,7 @@ class magic_tunnel:
     def magic_send(self, packet_byte_array):
         pkt_to_send = self.do_magic(packet_byte_array)
         if pkt_to_send == None:
-            print("Send lost")
+            # print("Send lost")
             return
         else:
             self.send_queue.put(pkt_to_send)
@@ -44,7 +44,7 @@ class magic_tunnel:
         else:
             pkt_to_receive = self.do_magic(packet_byte_array)
             if pkt_to_receive == None:
-                print("Receive lost")
+                # print("Receive lost")
                 return
             else:
                 self.my_recv(pkt_to_receive)
